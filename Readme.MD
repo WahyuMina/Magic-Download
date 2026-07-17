@@ -1,7 +1,7 @@
 # MagicDownload✨
 
 <div align="center">
-  <img src="art/Logo.png" alt="Logo MagicDownload"/>
+  <img src="art/Logo.png" alt="Logo MagicDownload" widht="50%"/>
 </div>
 
 MagicDownload adalah aplikasi ekstraksi media berbasis Android yang dikembangkan menggunakan Kotlin. Aplikasi ini memanfaatkan mesin `yt-dlp` untuk mengekstrak dan mengunduh media dari berbagai platform web yang didukung.
