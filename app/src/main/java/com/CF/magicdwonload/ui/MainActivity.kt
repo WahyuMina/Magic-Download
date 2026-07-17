@@ -1,0 +1,111 @@
+package com.CF.magicdwonload.ui
+
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
+import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
+import com.CF.magicdwonload.R
+import com.CF.magicdwonload.databinding.ActivityMainBinding
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private val viewModel: MainViewModel by viewModels()
+
+    // Opsi kualitas media
+    private val videoQualities = arrayOf("1080p", "720p", "480p", "360p")
+    private val musicQualities = arrayOf("320kbps (Tinggi)", "128kbps (Sedang)")
+
+    // Launcher perizinan notifikasi (Android 13+)
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (!isGranted) {
+            Toast.makeText(this, "Mohon izinkan notifikasi untuk melihat status unduhan", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        checkNotificationPermission()
+        setupQualitySpinner(videoQualities) // Baku awal: Video
+        setupListeners()
+        observeViewModel()
+    }
+
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    private fun setupQualitySpinner(qualities: Array<String>) {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, qualities)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerQuality.adapter = adapter
+    }
+
+    private fun setupListeners() {
+        // Menyembunyikan menu opsi jika input URL kosong
+        binding.etUrl.addTextChangedListener { text ->
+            val hasText = !text.isNullOrBlank()
+            binding.layoutOptions.visibility = if (hasText) View.VISIBLE else View.GONE
+        }
+
+        // Pembaruan dinamis Spinner berdasarkan tipe media
+        binding.rgFormat.setOnCheckedChangeListener { _, checkedId ->
+            if (checkedId == binding.rbVideo.id) {
+                setupQualitySpinner(videoQualities)
+            } else {
+                setupQualitySpinner(musicQualities)
+            }
+        }
+
+        binding.btnDownload.setOnClickListener {
+            val urlInput = binding.etUrl.text.toString().trim()
+            val selectedQuality = binding.spinnerQuality.selectedItem.toString()
+
+            if (urlInput.isEmpty()) {
+                binding.urlInputLayout.error = "Hei! Jangan suruh aku mengunduh udara kosong!"
+            } else if (!android.util.Patterns.WEB_URL.matcher(urlInput).matches()) {
+                binding.urlInputLayout.error = "Itu bukan tautan! Masukkan URL yang valid!"
+            } else {
+                binding.urlInputLayout.error = null
+                viewModel.startExtraction(urlInput, selectedQuality)
+            }
+        }
+    }
+
+    private fun observeViewModel() {
+        // Konfigurasi awal batas progress bar
+        binding.progressDownload.max = 100
+
+        // Menangkap status persentase unduhan
+        viewModel.downloadProgress.observe(this) { currentProgress ->
+            binding.progressDownload.progress = currentProgress
+        }
+
+        // Menangani visibilitas UI selama proses loading
+        viewModel.isLoading.observe(this) { isLoading ->
+            binding.progressDownload.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.btnDownload.isEnabled = !isLoading // Cegah spam klik tombol
+        }
+
+        // Menampilkan pesan hasil ekstraksi
+        viewModel.resultMessage.observe(this) { message ->
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+}
