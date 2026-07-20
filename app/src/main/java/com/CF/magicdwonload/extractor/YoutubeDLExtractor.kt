@@ -19,7 +19,7 @@ class YoutubeDLExtractor : MediaExtractor {
 
         return isStandardUrl && !hasDangerousChar && isSecure
     }
-
+// All Platfrom Download
     override suspend fun downloadMedia(
         url: String,
         quality: String,
