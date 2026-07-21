@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-// KELAS INI SEKARANG TUNDUK PADA KONTRAK MEDIAEXTRACTOR!
+// KELAS INI PADA KONTRAK MEDIAEXTRACTOR!
 class YoutubeDLExtractor : MediaExtractor {
 
     override fun isUrlValid(url: String?): Boolean {
