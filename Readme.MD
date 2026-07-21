@@ -38,8 +38,8 @@ https://saweria.co/WahyuMina
 4. Klik **Install** dan tunggu hingga selesai. MagicDownload siap digunakan!
 
 ## Apa Yang Baru?
-* Sekarang dukung unduhan platform Bstation.
-* Ukuran aplikasi turun lebih ringan.
+* Sekarang aplikasi dukung unduhan platform Bstation/BiliBili
+* Ukuran Aplikasi sudah lebih ringan
 
 
 ## License & Disclaimer
