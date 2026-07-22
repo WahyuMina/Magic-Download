@@ -38,6 +38,8 @@ class YoutubeDLExtractor : MediaExtractor {
                     addOption("--extractor-args", "youtube:player_client=android,web")
                     addOption("-o", outputTemplate)
                     addOption("--merge-output-format", "mkv")
+                    addOption("--embed-thumbnail") // Gambar ke dalam file
+                    addOption("--add-metadata") // Menambahkan informasi judul, artis, dll
 
                     when (quality) {
                         "1080p" -> addOption("-f", "bestvideo[height<=1080]+bestaudio/best")
