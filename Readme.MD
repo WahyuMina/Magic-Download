@@ -32,13 +32,19 @@ https://saweria.co/WahyuMina
 4. Lakukan Gradle Sync dan jalankan aplikasi pada emulator atau perangkat fisik (API Level 26+).
 
 ## Cara install
+<<<<<<< HEAD
 1. Unduh file `MagicDownload-v1.2.0.apk` yang ada di bagian **[Releases](https://github.com/WahyuMina/Magic-Download/releases/tag/V1.2.0)**.
+=======
+1. Unduh file `MagicDownload-v1.1.1.apk` yang ada di bagian **[Releases](https://github.com/WahyuMina/Magic-Download/releases/tag/V1.1.1)**.
+>>>>>>> 66e300f92f90ccc05742a4a9b3ee7ab4f6d7de63
 2. Buka file APK yang sudah diunduh.
 3. Jika muncul peringatan *"Install from Unknown Sources"* (Instal dari Sumber Tidak Dikenal), berikan izin pada peramban/file manager-mu.
 4. Klik **Install** dan tunggu hingga selesai. MagicDownload siap digunakan!
 
 ## Apa Yang Baru?
 * Sekarang aplikasi akan langsung menampilkan gambar thumbnail dari video segera setelah tautan ditempelkan.
+* Sekarang aplikasi dukung unduhan platform Bstation/BiliBili
+* Ukuran Aplikasi sudah lebih ringan
 
 
 ## License & Disclaimer
