@@ -12,8 +12,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.lifecycleScope
 import com.CF.magicdwonload.R
 import com.CF.magicdwonload.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -58,10 +60,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        // Menyembunyikan menu opsi jika input URL kosong
+        // Menarik thumbnail otomatis saat URL valid dimasukkan
         binding.etUrl.addTextChangedListener { text ->
-            val hasText = !text.isNullOrBlank()
-            binding.layoutOptions.visibility = if (hasText) View.VISIBLE else View.GONE
+            val url = text.toString().trim()
+            val isValidUrl = android.util.Patterns.WEB_URL.matcher(url).matches()
+
+            if (isValidUrl) {
+                binding.layoutOptions.visibility = View.VISIBLE
+                fetchThumbnailPreview(url) // Fungsi menarik gambar
+            } else {
+                binding.layoutOptions.visibility = View.GONE
+                binding.thumbnailPreview.visibility = View.GONE
+            }
+
         }
 
         // Pembaruan dinamis Spinner berdasarkan tipe media
@@ -84,6 +95,32 @@ class MainActivity : AppCompatActivity() {
             } else {
                 binding.urlInputLayout.error = null
                 viewModel.startExtraction(urlInput, selectedQuality)
+            }
+        }
+    }
+
+    private  fun fetchThumbnailPreview(videoUrl : String) {
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+            // Tarik metadata dari YoutubeDL
+                val streamInfo = com.yausername.youtubedl_android.YoutubeDL.getInstance().getInfo(videoUrl)
+                val thumbnailUrl = streamInfo.thumbnail
+
+            // Kembail ke UI Thread untuk menampilkan gambar
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    if (!thumbnailUrl.isNullOrEmpty()) {
+                        binding.thumbnailPreview.visibility = View.VISIBLE
+
+                        // Memuat gambar
+                        com.bumptech.glide.Glide.with(this@MainActivity)
+                            .load(thumbnailUrl)
+                            .into(binding.thumbnailPreview)
+                    }
+                }
+            } catch (e: Exception) {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    binding.thumbnailPreview.visibility = View.GONE
+                }
             }
         }
     }
