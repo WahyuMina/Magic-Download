@@ -16,6 +16,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.CF.magicdwonload.extractor.YoutubeDLExtractor
+import com.yausername.youtubedl_android.YoutubeDLRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -115,7 +116,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _resultMessage.value = "Sedang Mengunduh..."
             _downloadProgress.value = 0
 
+            val request = YoutubeDLRequest(url)
             val isAudio = quality.contains("kbps")
+            val isMusicFormat = quality.contains("kbps", ignoreCase = true)
             val subFolderName = if (isAudio) "Music" else "Video"
             val baseDownloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
@@ -126,6 +129,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _resultMessage.value = "Gagal mengalokasikan ruang penyimpanan. Pastikan memori cukup!"
                 _isLoading.value = false
                 return@launch
+            }
+
+            if (isMusicFormat) {
+                request.addOption("-x") // Ekstrak audio
+                request.addOption("--audio-format", "mp3")
+
+                request.addOption("--embed-thumbnail")
+
+                if (quality.contains("320")) {
+                    request.addOption("--audio-quality", "0") // Kualitas Terbaik
+                } else {
+                    request.addOption("--audio-quality", "5") // Kualitas Sedang
+                }
             }
 
             updateSystemNotification(0, "Membuka Jalur unduhan...")
