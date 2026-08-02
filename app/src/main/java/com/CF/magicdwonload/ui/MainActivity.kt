@@ -145,4 +145,28 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun updateYoutubeDLExtractor() {
+        // Berjalan di background thread
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                // Update YoutubeDL
+                val status = com.yausername.youtubedl_android.YoutubeDL.getInstance()
+                    .updateYoutubeDL(applicationContext, com.yausername.youtubedl_android.YoutubeDL.UpdateChannel._STABLE)
+
+                // Kembail ke UI Thread untuk menampilkan pesan
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    if (status == com.yausername.youtubedl_android.YoutubeDL.UpdateStatus.DONE) {
+                        Toast.makeText(this@MainActivity, "Mesin Berhasil Diperbarui!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@MainActivity, "Mesin Sudah Versi Terbaru.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, "Gagal Memperbarui Mesin: Cek Koneksi!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 }
