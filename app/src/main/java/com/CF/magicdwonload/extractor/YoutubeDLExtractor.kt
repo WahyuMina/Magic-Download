@@ -41,18 +41,18 @@ class YoutubeDLExtractor : MediaExtractor {
                     addOption("--embed-thumbnail") // Gambar ke dalam file
                     addOption("--add-metadata") // Menambahkan informasi judul, artis, dll
 
-                    when (quality) {
-                        "1080p" -> addOption("-f", "bestvideo[height<=1080]+bestaudio/best")
-                        "720p"  -> addOption("-f", "bestvideo[height<=720]+bestaudio/best")
-                        "480p"  -> addOption("-f", "bestvideo[height<=480]+bestaudio/best")
-                        "360p"  -> addOption("-f", "best")
-                        "320kbps (Tinggi)" -> {
+                    when  {
+                        quality.contains("1080p") -> addOption("-f", "bestvideo[height<=1080]+bestaudio/best")
+                        quality.contains("720p")  -> addOption("-f", "bestvideo[height<=720]+bestaudio/best")
+                        quality.contains("480p")  -> addOption("-f", "bestvideo[height<=480]+bestaudio/best")
+                        quality.contains("360p")  -> addOption("-f", "best")
+                        quality.contains("320kbps") -> {
                             addOption("-f", "bestaudio/best")
                             addOption("--extract-audio")
                             addOption("--audio-format", "mp3")
                             addOption("--audio-quality", "320k")
                         }
-                        "128kbps (Sedang)" -> {
+                        quality.contains("128kbps") -> {
                             addOption("-f", "bestaudio/best")
                             addOption("--extract-audio")
                             addOption("--audio-format", "mp3")
@@ -65,7 +65,7 @@ class YoutubeDLExtractor : MediaExtractor {
                 var downloadStatus = "Mempersiapkan jalur unduhan..."
                 var finalFilePath = ""
 
-                val response = YoutubeDL.getInstance().execute(request) { progress, eta, line ->
+                val response = YoutubeDL.getInstance().execute(request, "MAGIC_DOWNLOAD_TASK") { progress, eta, line ->
                     if (!line.isNullOrEmpty()) {
 
                         if (line.contains("[download]")) {

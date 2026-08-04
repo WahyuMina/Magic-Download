@@ -1,6 +1,7 @@
 package com.CF.magicdwonload.ui
 
 import android.app.Application
+import android.app.DownloadManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -38,6 +39,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val channelId = "magic_download_channel"
     private val notificationId = 888
     private val notificationManager = getApplication<Application>().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    private val DOWNLOAD_PROCESS_ID = "MAGIC_DOWNLOAD_TASK"
+
 
     init {
         createNotificationChannel()
@@ -84,6 +88,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         if (!filePath.isNullOrEmpty()) {
             try {
+
                 // Arahkan notifikasi ke Download Manager bawaan sistem
                 val intent = Intent(android.app.DownloadManager.ACTION_VIEW_DOWNLOADS).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -155,7 +160,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     _downloadProgress.postValue(currentProgress)
                     Log.d("MAGIC_DEBUG", "Progress: $currentProgress%")
 
-                    updateSystemNotification(currentProgress, "$sizeStatus$timeRemaining")
+                    val friendlySizeStatus = sizeStatus
+                        .replace("MiB", "MB")
+                        .replace("KiB", "KB")
+                        .replace("GiB", "GB")
+
+                    updateSystemNotification(currentProgress, "$friendlySizeStatus$timeRemaining")
                 }
             }
 
@@ -188,6 +198,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             _isLoading.value = false
+        }
+    }
+
+    fun cancelDownload() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Membunuh proses berdasarkan ID
+                com.yausername.youtubedl_android.YoutubeDL.getInstance().destroyProcessById(DOWNLOAD_PROCESS_ID)
+
+                withContext(Dispatchers.Main) {
+                    _isLoading.value = false
+                    _resultMessage.value = "Unduhan dibatalkan!"
+                    // Matikan notifikasi sistem jika dibatalkan
+                    notificationManager.cancel(notificationId)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

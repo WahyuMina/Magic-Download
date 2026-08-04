@@ -46,6 +46,14 @@
                 android:textColor="#A0A0A0"
                 android:layout_marginBottom="28dp"/>
 
+            <ImageView
+                android:id="@+id/thumbnailPreview"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:layout_marginBottom="15dp"/>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/urlInputLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -59,6 +67,7 @@
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusBottomEnd="12dp">
+
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etUrl"
@@ -74,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="gone"
-                android:layout_marginTop="20dp">
+                android:layout_marginTop="24dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -119,13 +128,35 @@
                     android:textColor="#FFD700"
                     android:layout_marginBottom="8dp"/>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="15dp">
+
                 <Spinner
                     android:id="@+id/spinnerQuality"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="50dp"
+                    android:layout_weight="1"
                     android:paddingStart="8dp"
                     android:backgroundTint="#FFD700"
-                    android:layout_marginBottom="24dp"/>
+                    android:layout_marginBottom="15dp"/>
+                    
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="12dp"
+                    android:text="Batal"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    app:cornerRadius="12dp"
+                    app:backgroundTint="@android:color/transparent"
+                    android:textColor="#808080"/>
+            </LinearLayout>
+
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -159,7 +190,7 @@
                 android:textAlignment="center"
                 android:textColorHint="#A0A0A0"
                 android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="5dp"/>
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
