@@ -32,7 +32,7 @@ https://saweria.co/WahyuMina
 4. Lakukan Gradle Sync dan jalankan aplikasi pada emulator atau perangkat fisik (API Level 26+).
 
 ## Cara install
-1. Unduh file `MagicDownload-v1.2.1.apk` yang ada di bagian **[Releases](https://github.com/WahyuMina/Magic-Download/releases/tag/V1.2.1)**.
+1. Unduh file `MagicDownload-v1.3.2.apk` yang ada di bagian **[Releases](https://github.com/WahyuMina/Magic-Download/releases/tag/V1.3.2)**.
 2. Buka file APK yang sudah diunduh.
 3. Jika muncul peringatan *"Install from Unknown Sources"* (Instal dari Sumber Tidak Dikenal), berikan izin pada peramban/file manager-mu.
 4. Klik **Install** dan tunggu hingga selesai. MagicDownload siap digunakan!
