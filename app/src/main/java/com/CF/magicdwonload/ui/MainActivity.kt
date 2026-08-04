@@ -16,14 +16,15 @@ import androidx.lifecycle.lifecycleScope
 import com.CF.magicdwonload.R
 import com.CF.magicdwonload.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
+import java.security.DrbgParameters
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
 
     // Opsi kualitas media
-    private val videoQualities = arrayOf("1080p", "720p", "480p", "360p")
-    private val musicQualities = arrayOf("320kbps (Tinggi)", "128kbps (Sedang)")
+    private var videoQualities = arrayOf("1080p", "720p", "480p", "360p")
+    private var musicQualities = arrayOf("320kbps (Tinggi)", "128kbps (Sedang)")
 
     // Launcher perizinan notifikasi (Android 13+)
     private val requestPermissionLauncher = registerForActivityResult(
@@ -40,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         checkNotificationPermission()
+        updateYoutubeDLExtractor()
         setupQualitySpinner(videoQualities) // Baku awal: Video
         setupListeners()
         observeViewModel()
@@ -72,8 +74,13 @@ class MainActivity : AppCompatActivity() {
                 binding.layoutOptions.visibility = View.GONE
                 binding.thumbnailPreview.visibility = View.GONE
             }
-
         }
+        // Aksi saat tombol batal
+        binding.btnCancel.setOnClickListener {
+            viewModel.cancelDownload()
+            binding.progressDownload.progress = 0
+        }
+
 
         // Pembaruan dinamis Spinner berdasarkan tipe media
         binding.rgFormat.setOnCheckedChangeListener { _, checkedId ->
@@ -106,7 +113,43 @@ class MainActivity : AppCompatActivity() {
                 val streamInfo = com.yausername.youtubedl_android.YoutubeDL.getInstance().getInfo(videoUrl)
                 val thumbnailUrl = streamInfo.thumbnail
 
-            // Kembail ke UI Thread untuk menampilkan gambar
+                val videoDuration = streamInfo.duration
+
+            // menampung ukuran file
+                var s1080 = 0L; var s720 = 0L; var s480 = 0L; var s360 = 0L
+                var sAudioHigh = 0L; var sAudioLow = 0L
+
+            //membaca ukuran setiap format yang tersedia
+                streamInfo.formats?.forEach { format ->
+                    val size = if (format.fileSize > 0L) {
+                        format.fileSize
+                    } else if (format.tbr > 0 && videoDuration > 0) {
+                        (format.tbr * 1024 / 8 * videoDuration).toLong()
+                    } else {
+                        0L// panggil balik dari else
+                    }
+
+                    if (size > 0L) {
+                        val h = format.height
+
+                        if (h >= 1000) {
+                            s1080 = maxOf(s1080, size) // Menangkap 1080p dan resolusi vertikal besar
+                        } else if (h >= 700) {
+                            s720 = maxOf(s720, size)   // Menangkap 720p, 718p, dll
+                        } else if (h >= 400) {
+                            s480 = maxOf(s480, size)   // Menangkap 480p, 540p, 640p
+                        } else if (h > 0) {
+                            s360 = maxOf(s360, size)   // Menangkap 360p ke bawah
+                        }
+
+                        if (format.acodec != "none" && format.vcodec == "none") {
+                            sAudioHigh = maxOf(sAudioHigh, size)
+                            if (sAudioLow == 0L) sAudioLow = size else sAudioLow = minOf(sAudioLow, size)
+                        }
+                    }
+                }
+
+            // Kembail ke UI Thread untuk menampilkan tempilan
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                     if (!thumbnailUrl.isNullOrEmpty()) {
                         binding.thumbnailPreview.visibility = View.VISIBLE
@@ -115,6 +158,30 @@ class MainActivity : AppCompatActivity() {
                         com.bumptech.glide.Glide.with(this@MainActivity)
                             .load(thumbnailUrl)
                             .into(binding.thumbnailPreview)
+                    }
+                    fun formatMB(bytes: Long): String {
+                        if (bytes <= 0L) return "MB" // jk server menyembunyikan ukuran
+                        return  String.format("%.1f MB", bytes / (1024.0 * 1024.0))
+                    }
+
+                    // menampilkan ukuran file video
+                    videoQualities = arrayOf(
+                        "1080p (${formatMB(s1080)})",
+                        "720p (${formatMB(s720)})",
+                        "480p (${formatMB(s480)})",
+                        "360p (${formatMB(s360)})"
+
+                    )
+                    // menampilkan ukuran file audio
+                    musicQualities = arrayOf(
+                        "320kbps (Tinggi) (${formatMB(sAudioHigh)})",
+                        "128kbps (Sedang) (${formatMB(sAudioLow)})"
+                    )
+
+                    if (binding.rbVideo.isChecked) {
+                        setupQualitySpinner(videoQualities)
+                    } else {
+                        setupQualitySpinner(musicQualities)
                     }
                 }
             } catch (e: Exception) {
@@ -137,7 +204,11 @@ class MainActivity : AppCompatActivity() {
         // Menangani visibilitas UI selama proses loading
         viewModel.isLoading.observe(this) { isLoading ->
             binding.progressDownload.visibility = if (isLoading) View.VISIBLE else View.GONE
+
+            binding.btnCancel.visibility = if (isLoading) View.VISIBLE else View.GONE // Tampil tombol batal jika sedang loading
+
             binding.btnDownload.isEnabled = !isLoading // Cegah spam klik tombol
+            binding.etUrl.isEnabled = !isLoading // Cegah spam input URL
         }
 
         // Menampilkan pesan hasil ekstraksi
