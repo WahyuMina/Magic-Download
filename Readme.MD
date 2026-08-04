@@ -38,7 +38,9 @@ https://saweria.co/WahyuMina
 4. Klik **Install** dan tunggu hingga selesai. MagicDownload siap digunakan!
 
 ## Apa Yang Baru?
-* Mengatasi video platform tidak bisa mengunduh
+* Menambahkan fitur batal unduhan
+* Mengatasi platform lain gagal mengunduh
+* Memperbarui logika pengunduhan platform lain
 
 ## License & Disclaimer
 This project is licensed under the MIT License.
