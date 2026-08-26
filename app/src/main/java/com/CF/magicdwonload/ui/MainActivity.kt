@@ -69,10 +69,14 @@ class MainActivity : AppCompatActivity() {
 
             if (isValidUrl) {
                 binding.layoutOptions.visibility = View.VISIBLE
+                binding.thumbnailContainer.visibility = View.VISIBLE
+                binding.thumbnailLoading.visibility = View.VISIBLE
+                binding.thumbnailPreview.visibility = View.VISIBLE
+
                 fetchThumbnailPreview(url) // Fungsi menarik gambar
             } else {
                 binding.layoutOptions.visibility = View.GONE
-                binding.thumbnailPreview.visibility = View.GONE
+                binding.thumbnailContainer.visibility = View.GONE
             }
         }
         // Aksi saat tombol batal
@@ -151,12 +155,16 @@ class MainActivity : AppCompatActivity() {
 
             // Kembail ke UI Thread untuk menampilkan tempilan
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+
+                    binding.thumbnailLoading.visibility = View.GONE
+
                     if (!thumbnailUrl.isNullOrEmpty()) {
                         binding.thumbnailPreview.visibility = View.VISIBLE
 
-                        // Memuat gambar
+                        // Memuat gambar Glide & Fallback Error
                         com.bumptech.glide.Glide.with(this@MainActivity)
                             .load(thumbnailUrl)
+                            .error(android.R.drawable.ic_dialog_alert)
                             .into(binding.thumbnailPreview)
                     }
                     fun formatMB(bytes: Long): String {
@@ -186,6 +194,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    binding.thumbnailLoading.visibility = View.GONE
                     binding.thumbnailPreview.visibility = View.GONE
                 }
             }
@@ -218,12 +227,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateYoutubeDLExtractor() {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val lastCheck = prefs.getLong("Last_update_check", 0)
+        val currentTime = System.currentTimeMillis()
+
+        if (currentTime - lastCheck < 8400000) return
+
         // Berjalan di background thread
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
                 // Update YoutubeDL
                 val status = com.yausername.youtubedl_android.YoutubeDL.getInstance()
                     .updateYoutubeDL(applicationContext, com.yausername.youtubedl_android.YoutubeDL.UpdateChannel._STABLE)
+
+                // Simpan waktu pengecekan jika berhasil menghubungi server
+                prefs.edit().putLong("last_update_check", currentTime).apply()
 
                 // Kembail ke UI Thread untuk menampilkan pesan
                 kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
@@ -234,9 +252,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
-                    Toast.makeText(this@MainActivity, "Gagal Memperbarui Mesin: Cek Koneksi!", Toast.LENGTH_SHORT).show()
-                }
+                android.util.Log.e("YoutubeDL", "Gagal Mengupdate", e)
             }
         }
     }
