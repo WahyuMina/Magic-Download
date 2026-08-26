@@ -38,7 +38,8 @@ https://saweria.co/WahyuMina
 4. Klik **Install** dan tunggu hingga selesai. MagicDownload siap digunakan!
 
 ## Apa Yang Baru?
-* Mengatasi progress tubmnail tidak keluar
+* Mengatasi progress thumbnail tidak keluar
+* Mengatasi mode mengambang tidak bisa menggeser saat pengunduhan di tekan
 
 ## License & Disclaimer
 This project is licensed under the MIT License.
