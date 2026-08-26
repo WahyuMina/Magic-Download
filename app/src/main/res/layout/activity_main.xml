@@ -46,13 +46,30 @@
                 android:textColor="#A0A0A0"
                 android:layout_marginBottom="28dp"/>
 
+            <FrameLayout
+                android:id="@+id/thumbnailContainer"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginBottom="15dp"
+                android:visibility="gone">
+
+
             <ImageView
                 android:id="@+id/thumbnailPreview"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
+                android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:visibility="gone"
                 android:layout_marginBottom="15dp"/>
+
+                <ProgressBar
+                    android:id="@+id/thumbnailLoading"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:indeterminateTint="#FFD700"/>
+
+            </FrameLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/urlInputLayout"
